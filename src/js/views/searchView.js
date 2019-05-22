@@ -73,8 +73,10 @@ const renderRecipe = recipe => {
 };
 
 // type 'prev' or 'next
-const createButton = (page, type) => {
-    return `
+// 兩者不同
+// () => { return ...} vs () => ...;
+const createButton = (page, type) =>
+    `
     <button class="btn-inline results__btn--${type}" data-goto=${type === 'prev' ? page - 1 : page + 1}>
             <svg class="search__icon">
                     <use href="img/icons.svg#icon-triangle-${type === 'prev' ? 'left' : 'right'}"></use>
@@ -83,8 +85,6 @@ const createButton = (page, type) => {
     </button>
 
     `;
-};
-
 const renderButtons = (page, numResults, resPerPage) => {
     // Math.ceil() 函式會回傳大於等於所給數字的最小整數。
     const pages = Math.ceil(numResults / resPerPage);
