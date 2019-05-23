@@ -1,6 +1,7 @@
 import '../css/style.css'; //css
 import Search from './models/Search';
 import * as searchView from './views/searchView';
+import * as recipeView from './views/recipeView';
 import { elements, renderLoader, clearLoader } from './views/base';
 import Recipe from './models/Recipe';
 /** Global state of the app
@@ -60,14 +61,20 @@ elements.searchResPages.addEventListener('click', e => {
 const controlRecipe = async () => {
     // Get ID from url
     const id = window.location.hash.replace('#', '');
-    console.log(id);
     if (id) {
+        // Prepare UI from result
+        recipeView.clearRecipe(); // 清除舊畫面
+        renderLoader(elements.recipe); // 讀取
+
+        // Highlight 選擇搜尋
+        if (state.search) searchView.highlightSelected(id);
+
         // Create new recipe object
         state.recipe = new Recipe(id);
         try {
             // 獲取食譜數據並解析成分
             await state.recipe.getRecipe();
-
+            console.log(state.recipe.ingredients);
             state.recipe.parseIngredients();
 
             // 計算服務和時間
@@ -75,7 +82,8 @@ const controlRecipe = async () => {
             state.recipe.calcServings();
 
             // Render recipe
-            console.log(state.recipe);
+            clearLoader();
+            recipeView.renderRecipe(state.recipe);
         } catch (err) {
             alert('Error processing recipe!');
         }

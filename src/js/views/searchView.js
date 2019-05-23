@@ -2,7 +2,7 @@ import { elements } from './base';
 
 export const getInput = () => elements.searchInput.value;
 
-//清除輸入
+// 清除輸入
 export const clearInput = () => {
     elements.searchInput.value = '';
 };
@@ -11,6 +11,19 @@ export const clearInput = () => {
 export const clearResult = () => {
     elements.searchResList.innerHTML = '';
     elements.searchResPages.innerHTML = '';
+};
+
+// 選擇食物
+export const highlightSelected = id => {
+    /*
+    使用 classList 屬性是取得元素 Class 的一種便利方式，也可以透過 element.className 
+    來得到以空格分隔之 Class 清單字串。
+    */
+    const resultsArr = Array.from(document.querySelectorAll('.results_link'));
+    resultsArr.forEach(el => {
+        el.classList.remove('results__link--active');
+    });
+    document.querySelector(`a[href=#${id}]`).classList.add('.result__link--active');
 };
 
 /**

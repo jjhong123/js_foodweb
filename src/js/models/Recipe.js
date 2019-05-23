@@ -88,7 +88,7 @@ export default class Recipe {
                 objIng = {
                     count,
                     unit: arrIng[unitIndex],
-                    ingredient: arrIng.slice(unitIndex + 1).join(' '),
+                    ingredient: arrIng.slice(unitIndex + 1).join(' ')
                 };
             } else if (parseInt(arrIng[0], 10)) {
                 // 沒有單位，但是第1個要素是數字
@@ -96,7 +96,7 @@ export default class Recipe {
                 objIng = {
                     count: parseInt(arrIng[0], 10),
                     unit: '',
-                    ingredient: arrIng.slice(1).join(' '),
+                    ingredient: arrIng.slice(1).join(' ')
                 };
             } else if (unitIndex === -1) {
                 // 第1位沒有單位和數字
@@ -104,7 +104,7 @@ export default class Recipe {
                 objIng = {
                     count: 1,
                     unit: '',
-                    ingredient,
+                    ingredient
                 };
             }
 
@@ -118,7 +118,7 @@ export default class Recipe {
         // Servings
         const newServings = type === 'dec' ? this.servings - 1 : this.servings + 1;
 
-        // Ingredients
+        // 食譜
         this.ingredients.forEach(ing => {
             ing.count *= newServings / this.servings;
         });
