@@ -10,7 +10,7 @@ export default class List {
             id: uniqid(),
             count,
             unit,
-            ingredient
+            ingredient,
         };
         this.items.push(item);
         return item;

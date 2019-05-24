@@ -2,8 +2,11 @@ import '../css/style.css'; //css
 import Search from './models/Search';
 import Recipe from './models/Recipe';
 import List from './models/List';
+import Likes from './models/Likes';
 import * as searchView from './views/searchView';
 import * as recipeView from './views/recipeView';
+import * as listView from './views/listView';
+import * as likesView from './views/likesView';
 import { elements, renderLoader, clearLoader } from './views/base';
 
 /** Global state of the app
@@ -86,7 +89,9 @@ const controlRecipe = async () => {
 
             // Render recipe
             clearLoader();
-            recipeView.renderRecipe(state.recipe);
+
+            // 食譜 與 喜歡
+            recipeView.renderRecipe(state.recipe, state.likes.isLiked(id));
         } catch (err) {
             console.log(err);
             alert('Error processing recipe!');
@@ -98,7 +103,68 @@ const controlRecipe = async () => {
 // window.addEventListener('load', controlRecipe);
 ['hashchange', 'load'].forEach(event => window.addEventListener(event, controlRecipe));
 
-// Handling recipe button clicks
+/**
+ * LIST CONTROLLER
+ */
+const controlList = () => {
+    // Create a new list if there in noen yet
+    if (!state.list) state.list = new List();
+
+    // Add each ingredient to the list and UI
+    state.recipe.ingredients.forEach(el => {
+        const item = state.list.addItem(el.count, el.unit, el.ingredient);
+        listView.renderItem(item);
+    });
+};
+/**
+ * LIKE CONTROLLER
+ */
+const controlLike = () => {
+    if (!state.likes) state.likes = new Likes();
+    const currentID = state.recipe.id;
+
+    // 用戶尚未喜歡當前食譜
+    if (!state.likes.isLiked(currentID)) {
+        // Add like to the state
+        const newLike = state.likes.addLike(currentID, state.recipe.title, state.recipe.author, state.recipe.img);
+        // 切換 the like button
+        likesView.toggleLikeBtn(true);
+
+        // Add like to UI list
+        likesView.renderLike(newLike);
+
+        // 用戶已經喜歡當前食譜
+    } else {
+        // 從狀態中刪除
+        state.likes.deleteLike(currentID);
+
+        // 切換 the like button
+        likesView.toggleLikeBtn(false);
+
+        // Remove like from UI list
+        likesView.deleteLike(currentID);
+    }
+    // 切換喜歡菜單顯示 如果裡面空的則不顯示
+    likesView.toggleLikeMenu(state.likes.getNumLikes());
+};
+
+// 處理刪除和更新列表項事件
+elements.shopping.addEventListener('click', e => {
+    const id = e.target.closest('.shopping__item').dataset.itemid;
+
+    // Handle the delete button
+    if (e.target.matches('.shopping__delete, .shopping__delete *')) {
+        // Delete from state
+        state.list.deleteItem(id);
+        // Delete from ui
+        ListView.deleteItem(id);
+    } else if (e.target.matches('.shopping__count-value')) {
+        const val = parseFloat(e.target.value, 10);
+        state.list.updataCount(id, val);
+    }
+});
+
+// 處理食譜按鈕點擊
 elements.recipe.addEventListener('click', e => {
     if (e.target.matches('.btn-decrease, .btn-decrease *')) {
         // Decrease button is clicked
@@ -110,12 +176,28 @@ elements.recipe.addEventListener('click', e => {
         }
     } else if (e.target.matches('.btn-increase, .btn-increase *')) {
         // Increase button is clicked
-
         //減少
         state.recipe.updateServings('inc');
-
         recipeView.updateServingsIngredients(state.recipe);
+    } else if (e.target.matches('.recipe__btn--add, .recipe__btn--add *')) {
+        // List controller
+        controlList();
+    } else if (e.target.matches('.recipe__love, .recipe__love *')) {
+        // Like controller
+        controlLike();
     }
 });
 
-window.l = new List();
+// 當畫面重新刷新
+window.addEventListener('load', () => {
+    state.likes = new Likes();
+
+    // 恢復 likes
+    state.likes.readStorage();
+
+    // 切換喜歡菜單顯示 如果裡面空的則不顯示
+    likesView.toggleLikeMenu(state.likes.getNumLikes());
+
+    // 渲染現有的喜歡
+    state.likes.likes.forEach(like => likesView.renderLike(like));
+});
