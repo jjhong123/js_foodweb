@@ -1,5 +1,5 @@
 import { elements } from './base';
-import { Fraction } from 'factional';
+import { Fraction } from 'fractional';
 //
 export const clearRecipe = () => {
     elements.recipe.innerHTML = '';
@@ -29,14 +29,14 @@ const formatCount = count => {
 // 配方
 const createIngredient = ingredient => `
     <li class="recipe__item">
-    <svg class="recipe__icon">
-        <use href="img/icons.svg#icon-check"></use>
-    </svg>
-    <div class="recipe__count">${formatCount(ingredient.count)}</div>
-    <div class="recipe__ingredient">
-        <span class="recipe__unit">${ingredient.unit}</span>
-        ${ingredient.ingredient}
-    </div>
+        <svg class="recipe__icon">
+            <use href="img/icons.svg#icon-check"></use>
+        </svg>
+        <div class="recipe__count">${formatCount(ingredient.count)}</div>
+        <div class="recipe__ingredient">
+            <span class="recipe__unit">${ingredient.unit}</span>
+            ${ingredient.ingredient}
+        </div>
     </li>
 `;
 
@@ -64,12 +64,12 @@ export const renderRecipe = recipe => {
             <span class="recipe__info-text"> servings</span>
 
             <div class="recipe__info-buttons">
-                <button class="btn-tiny">
+                <button class="btn-tiny btn-decrease">
                     <svg>
                         <use href="img/icons.svg#icon-circle-with-minus"></use>
                     </svg>
                 </button>
-                <button class="btn-tiny">
+                <button class="btn-tiny btn-increase">
                     <svg>
                         <use href="img/icons.svg#icon-circle-with-plus"></use>
                     </svg>
@@ -88,8 +88,7 @@ export const renderRecipe = recipe => {
 
     <div class="recipe__ingredients">
         <ul class="recipe__ingredient-list">
-        ${recipe.ingredents.map(el => createIngredient(el)).join('')}
-            
+            ${recipe.ingredients.map(el => createIngredient(el)).join('')} 
         </ul>
 
         <button class="btn-small recipe__btn">
@@ -117,4 +116,15 @@ export const renderRecipe = recipe => {
     
     `;
     elements.recipe.insertAdjacentHTML('afterbegin', markup);
+};
+
+export const updateServingsIngredients = recipe => {
+    // 更新 份(servings)
+    document.querySelector('.recipe__info-data--people').textContent = recipe.servings;
+
+    // 更新 增加(ingredeints)
+    const countElements = Array.from(document.querySelectorAll('.recipe__count'));
+    countElements.forEach((el, i) => {
+        el.textContent = formatCount(recipe.ingredients[i].count);
+    });
 };

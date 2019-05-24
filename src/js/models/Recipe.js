@@ -29,7 +29,8 @@ export default class Recipe {
         const periods = Math.ceil(numIng / 3);
         this.time = periods * 15;
     }
-    // 計算服務
+
+    // 計算份數
     calcServings() {
         this.servings = 4;
     }
@@ -76,11 +77,9 @@ export default class Recipe {
 
                 // 如果 只有一筆
                 if (arrCount.length === 1) {
-                    console.log(arrIng[0]);
                     // 1-1/2 => 1+1/2
                     count = eval(arrIng[0].replace('-', '+'));
                 } else {
-                    console.log(arrIng.slice(0, unitIndex));
                     // 分數轉換
                     count = eval(arrIng.slice(0, unitIndex).join('+'));
                 }
@@ -114,12 +113,13 @@ export default class Recipe {
         this.ingredients = newIngredients;
     }
 
+    // 更新 servings(份)
     updateServings(type) {
-        // Servings
         const newServings = type === 'dec' ? this.servings - 1 : this.servings + 1;
 
         // 食譜
         this.ingredients.forEach(ing => {
+            // a += b => a = a+b
             ing.count *= newServings / this.servings;
         });
 
