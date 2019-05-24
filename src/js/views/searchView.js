@@ -1,16 +1,29 @@
 import { elements } from './base';
-import { create } from 'domain';
 
 export const getInput = () => elements.searchInput.value;
 
-//清除輸入
+// 清除輸入
 export const clearInput = () => {
     elements.searchInput.value = '';
 };
 
-//
+// 清除結果,分頁
 export const clearResult = () => {
     elements.searchResList.innerHTML = '';
+    elements.searchResPages.innerHTML = '';
+};
+
+// 選擇食物
+export const highlightSelected = id => {
+    /*
+    使用 classList 屬性是取得元素 Class 的一種便利方式，也可以透過 element.className 
+    來得到以空格分隔之 Class 清單字串。
+    */
+    const resultsArr = Array.from(document.querySelectorAll('.results__link'));
+    resultsArr.forEach(el => {
+        el.classList.remove('results__link--active');
+    });
+    document.querySelector(`.results__link[href*="${id}"]`).classList.add('results__link--active');
 };
 
 /**
@@ -21,36 +34,34 @@ export const clearResult = () => {
  * acc: 15 / acc + cur.length = 18 / newTitle = ['Pasta','with','tomato]
  * acc: 18 / acc + cur.length = 24 / newTitle = ['Pasta','with','tomato]
  */
-const limitRecipeTitle = (title, limit = 17) => {
+export const limitRecipeTitle = (title, limit = 17) => {
     const newTitle = [];
     if (title.length > limit) {
         title.split(' ').reduce((acc, cur) => {
-            //比對每次累加的值有沒有超過或等於17
             if (acc + cur.length <= limit) {
                 newTitle.push(cur);
             }
             return acc + cur.length;
         }, 0);
 
-        //return the result
+        // return the result
         return `${newTitle.join(' ')} ...`;
     }
     return title;
 };
-
 const renderRecipe = recipe => {
     const markup = `
-    <li>
-        <a class="results__link results__link--active" href="#${recipe.recipe_id}">
-            <figure class="results__fig">
-                <img src="${recipe.image_url}" alt="${recipe.title}">
-            </figure>
-            <div class="results__data">
-                <h4 class="results__name">${limitRecipeTitle(recipe.title)}</h4>
-                <p class="results__author">${recipe.publisher}</p>
-            </div>
-        </a>
-    </li>
+        <li>
+            <a class="results__link" href="#${recipe.recipe_id}">
+                <figure class="results__fig">
+                    <img src="${recipe.image_url}" alt="${recipe.title}">
+                </figure>
+                <div class="results__data">
+                    <h4 class="results__name">${limitRecipeTitle(recipe.title)}</h4>
+                    <p class="results__author">${recipe.publisher}</p>
+                </div>
+            </a>
+        </li>
     `;
     // Example
     /*
@@ -73,8 +84,6 @@ const renderRecipe = recipe => {
 };
 
 // type 'prev' or 'next
-// 兩者不同
-// () => { return ...} vs () => ...;
 const createButton = (page, type) =>
     `
     <button class="btn-inline results__btn--${type}" data-goto=${type === 'prev' ? page - 1 : page + 1}>
@@ -85,20 +94,26 @@ const createButton = (page, type) =>
     </button>
 
     `;
+
 const renderButtons = (page, numResults, resPerPage) => {
     // Math.ceil() 函式會回傳大於等於所給數字的最小整數。
+    // pages 總頁數  = ( 30/10 ) = 3頁
+    // page = 要去頁數
     const pages = Math.ceil(numResults / resPerPage);
     let button;
     if (page === 1 && pages > 1) {
+        // 如果 頁數===第一頁 並且 總頁數大於1 只可以往後
         // Only button to go to next page
         button = createButton(page, 'next');
     } else if (page < pages) {
+        // 如果 頁數小於總頁數 只可以往前或往後
         // Both buttons
         button = `
             ${createButton(page, 'prev')}
             ${createButton(page, 'next')}
         `;
     } else if (page === pages && pages > 1) {
+        // 如果 頁數=總頁數 只可以往前
         // Only button to go to prev page
         button = createButton(page, 'prev');
     }
@@ -108,11 +123,18 @@ const renderButtons = (page, numResults, resPerPage) => {
 
 export const renderResults = (recipes, page = 1, resPerPage = 10) => {
     // render results of currents page
-    const start = (page - 1) * resPerPage; // 起始頁
-    const end = page * resPerPage; // 終點頁
+    // resPerPage 一頁最多幾個
+    // 第二頁
+    // example =>
+    // ( 2 - 1 ) * 10 = 10
+    // ( 2 * 10 ) = 20
+    // 10-20～～～～
+    const start = (page - 1) * resPerPage;
+    const end = page * resPerPage;
 
     // recipes.forEach(renderRecipe)
-    // slice 回傳薪陣列物件 => 不影響原本陣列
+    // slice 回傳新陣列物件 => 不影響原本陣列
+    // 10 - 20 筆資料 -> renderRecipe(渲染list) , renderButton(渲染分頁)
     recipes.slice(start, end).forEach(renderRecipe);
 
     //render pagination
